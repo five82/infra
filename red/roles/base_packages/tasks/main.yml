@@ -1,0 +1,114 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - neovim
+      - curl
+      - bash-completion
+      - snapraid
+      - mergerfs
+      - fuse3
+    state: present
+
+- name: Download Starship installer
+  ansible.builtin.get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship-install.sh
+    mode: "0755"
+
+- name: Install Starship
+  ansible.builtin.command:
+    cmd: /tmp/starship-install.sh -y
+    creates: /usr/local/bin/starship
+
+- name: Manage user .bashrc
+  ansible.builtin.copy:
+    src: bashrc
+    dest: "{{ ansible_env.HOME }}/.bashrc"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0644"
+
+- name: Ensure mount points exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /mnt/das1
+    - /mnt/das2
+    - /mnt/das3
+    - /mnt/parity1
+    - /media/daspool
+
+- name: Mount data disks
+  ansible.builtin.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+  loop:
+    - { path: /mnt/das1, src: "LABEL=das1" }
+    - { path: /mnt/das2, src: "LABEL=das2" }
+    - { path: /mnt/das3, src: "LABEL=das3" }
+
+- name: Mount parity disk
+  ansible.builtin.mount:
+    path: /mnt/parity1
+    src: "LABEL=parity1"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+
+- name: Allow FUSE allow_other
+  ansible.builtin.lineinfile:
+    path: /etc/fuse.conf
+    regexp: '^#?user_allow_other'
+    line: 'user_allow_other'
+    state: present
+
+- name: Mount mergerfs pool
+  ansible.builtin.mount:
+    path: /media/daspool
+    src: /mnt/das1:/mnt/das2:/mnt/das3
+    fstype: fuse.mergerfs
+    opts: defaults,allow_other,use_ino,category.create=mfs,moveonenospc=true
+    state: mounted
+
+- name: Install snapraid configuration
+  ansible.builtin.template:
+    src: snapraid.conf.j2
+    dest: /etc/snapraid.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install snapraid systemd units
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - snapraid-sync.service
+    - snapraid-sync.timer
+    - snapraid-scrub.service
+    - snapraid-scrub.timer
+  notify: Reload systemd
+
+- name: Enable and start snapraid timers
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - snapraid-sync.timer
+    - snapraid-scrub.timer
