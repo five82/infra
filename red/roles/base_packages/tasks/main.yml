@@ -125,11 +125,19 @@
     state: directory
     mode: "0755"
 
-- name: Ensure Samba includes conf.d
-  ansible.builtin.lineinfile:
+- name: Remove any existing Samba conf.d include lines
+  ansible.builtin.replace:
     path: /etc/samba/smb.conf
-    line: "include = /etc/samba/smb.conf.d/*.conf"
-    state: present
+    regexp: '^[;#]?\\s*include\\s*=\\s*/etc/samba/smb\\.conf\\.d/.*$\\n?'
+    replace: ''
+  notify: Restart Samba
+
+- name: Ensure Samba includes conf.d in [global]
+  ansible.builtin.ini_file:
+    path: /etc/samba/smb.conf
+    section: global
+    option: include
+    value: /etc/samba/smb.conf.d/daspool.conf
   notify: Restart Samba
 
 - name: Install Samba share for daspool
