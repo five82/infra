@@ -23,6 +23,13 @@
     jellyfin_uid: "{{ jellyfin_getent.stdout.split(':')[2] }}"
     jellyfin_gid: "{{ jellyfin_getent.stdout.split(':')[3] }}"
 
+- name: Ensure Jellyfin user is in video group
+  ansible.builtin.user:
+    name: "{{ jellyfin_user }}"
+    groups:
+      - video
+    append: true
+
 - name: Ensure Jellyfin config/cache directories exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -53,7 +60,9 @@
   vars:
     jellyfin_config_dir: "{{ jellyfin_home }}/.jellyfin/config"
     jellyfin_cache_dir: "{{ jellyfin_home }}/.jellyfin/cache"
-  notify: Reload systemd
+  notify:
+    - Reload systemd
+    - Restart Jellyfin
 
 - name: Flush systemd reload handler
   ansible.builtin.meta: flush_handlers

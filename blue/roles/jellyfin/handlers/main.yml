@@ -2,3 +2,18 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
+
+- name: Check Jellyfin unit load state
+  ansible.builtin.command:
+    cmd: systemctl show -p LoadState jellyfin.service
+  changed_when: false
+  failed_when: false
+  register: jellyfin_load_state
+
+- name: Restart Jellyfin
+  ansible.builtin.systemd:
+    name: jellyfin.service
+    state: restarted
+  when:
+    - jellyfin_load_state.stdout is defined
+    - "'LoadState=not-found' not in jellyfin_load_state.stdout"
