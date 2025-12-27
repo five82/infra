@@ -7,4 +7,5 @@
   roles:
     - tailscale
     - base_packages
+    - nas_mount
     - nodejs

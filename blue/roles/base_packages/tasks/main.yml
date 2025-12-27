@@ -14,6 +14,7 @@
       - ripgrep
       - btop
       - unattended-upgrades
+      - nfs-common
     state: present
 
 - name: Download Starship installer

@@ -1,0 +1,14 @@
+---
+- name: Ensure NAS mount point exists
+  ansible.builtin.file:
+    path: /media/daspool
+    state: directory
+    mode: "0755"
+
+- name: Add NAS NFS mount for Jellyfin
+  ansible.builtin.mount:
+    path: /media/daspool
+    src: 10.100.90.3:/
+    fstype: nfs4
+    opts: noauto,x-systemd.automount,_netdev,nofail,hard,timeo=600,retrans=2
+    state: present
