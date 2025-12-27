@@ -12,6 +12,7 @@
       - curl
       - bash-completion
       - ripgrep
+      - btop
       - snapraid
       - mergerfs
       - fuse3

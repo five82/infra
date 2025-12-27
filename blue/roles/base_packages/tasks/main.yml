@@ -12,6 +12,7 @@
       - curl
       - bash-completion
       - ripgrep
+      - btop
       - unattended-upgrades
     state: present
 
