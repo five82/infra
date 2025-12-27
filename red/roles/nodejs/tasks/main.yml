@@ -1,0 +1,26 @@
+---
+- name: Install nvm
+  ansible.builtin.shell:
+    cmd: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
+    creates: "{{ nvm_home }}/.nvm/nvm.sh"
+    executable: /bin/bash
+  environment:
+    HOME: "{{ nvm_home }}"
+    NVM_DIR: "{{ nvm_home }}/.nvm"
+  become: false
+  vars:
+    nvm_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    nvm_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ nvm_user, true) }}"
+
+- name: Install Node.js 25 via nvm
+  ansible.builtin.shell:
+    cmd: "source {{ nvm_home }}/.nvm/nvm.sh && nvm install 25"
+    creates: "{{ nvm_home }}/.nvm/versions/node/v25.2.1/bin/node"
+    executable: /bin/bash
+  environment:
+    HOME: "{{ nvm_home }}"
+    NVM_DIR: "{{ nvm_home }}/.nvm"
+  become: false
+  vars:
+    nvm_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    nvm_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ nvm_user, true) }}"

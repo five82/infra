@@ -7,3 +7,4 @@
   roles:
     - tailscale
     - base_packages
+    - nodejs
