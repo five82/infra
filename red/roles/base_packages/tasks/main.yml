@@ -15,6 +15,7 @@
       - mergerfs
       - fuse3
       - nfs-kernel-server
+      - samba
     state: present
 
 - name: Download Starship installer
@@ -117,6 +118,51 @@
     name: nfs-kernel-server
     enabled: true
     state: started
+
+- name: Ensure Samba config include directory exists
+  ansible.builtin.file:
+    path: /etc/samba/smb.conf.d
+    state: directory
+    mode: "0755"
+
+- name: Ensure Samba includes conf.d
+  ansible.builtin.lineinfile:
+    path: /etc/samba/smb.conf
+    line: "include = /etc/samba/smb.conf.d/*.conf"
+    state: present
+  notify: Restart Samba
+
+- name: Install Samba share for daspool
+  ansible.builtin.template:
+    src: daspool.smb.conf.j2
+    dest: /etc/samba/smb.conf.d/daspool.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Samba
+
+- name: Ensure Samba services are enabled and started
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - smbd
+    - nmbd
+
+- name: Check for Samba user
+  ansible.builtin.command:
+    cmd: pdbedit -L
+  register: samba_users
+  changed_when: false
+
+- name: Ensure Samba user exists and has password
+  ansible.builtin.command:
+    cmd: smbpasswd -s -a ken
+  args:
+    stdin: "{{ smb_password }}\n{{ smb_password }}\n"
+  when: "'ken:' not in samba_users.stdout"
+  no_log: true
 
 - name: Install snapraid systemd units
   ansible.builtin.copy:
