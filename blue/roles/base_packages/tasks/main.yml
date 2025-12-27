@@ -1,0 +1,60 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - neovim
+      - curl
+      - bash-completion
+      - ripgrep
+    state: present
+
+- name: Download Starship installer
+  ansible.builtin.get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship-install.sh
+    mode: "0755"
+
+- name: Install Starship
+  ansible.builtin.command:
+    cmd: /tmp/starship-install.sh -y
+    creates: /usr/local/bin/starship
+
+- name: Download Atuin installer
+  ansible.builtin.get_url:
+    url: https://setup.atuin.sh
+    dest: /tmp/atuin-install.sh
+    mode: "0755"
+  become: false
+
+- name: Install Atuin
+  ansible.builtin.command:
+    cmd: /bin/sh /tmp/atuin-install.sh
+    creates: "{{ atuin_home }}/.atuin/bin/atuin"
+  environment:
+    HOME: "{{ atuin_home }}"
+    USER: "{{ atuin_user }}"
+    LOGNAME: "{{ atuin_user }}"
+    ATUIN_INSTALL_DIR: "{{ atuin_home }}/.atuin/bin"
+  become: false
+  vars:
+    atuin_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    atuin_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ atuin_user, true) }}"
+
+- name: Manage user .bashrc
+  ansible.builtin.copy:
+    src: bashrc
+    dest: "{{ ansible_env.HOME }}/.bashrc"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0644"
+
+- name: Set system timezone to America/New_York
+  ansible.builtin.command:
+    cmd: timedatectl set-timezone America/New_York
+  changed_when: false

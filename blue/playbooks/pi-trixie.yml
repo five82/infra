@@ -1,0 +1,8 @@
+---
+- name: Raspberry Pi OS Trixie headless base packages
+  hosts: local
+  become: true
+  gather_facts: true
+
+  roles:
+    - base_packages

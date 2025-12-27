@@ -11,6 +11,7 @@
       - neovim
       - curl
       - bash-completion
+      - ripgrep
       - snapraid
       - mergerfs
       - fuse3
@@ -28,6 +29,27 @@
   ansible.builtin.command:
     cmd: /tmp/starship-install.sh -y
     creates: /usr/local/bin/starship
+
+- name: Download Atuin installer
+  ansible.builtin.get_url:
+    url: https://setup.atuin.sh
+    dest: /tmp/atuin-install.sh
+    mode: "0755"
+  become: false
+
+- name: Install Atuin
+  ansible.builtin.command:
+    cmd: /bin/sh /tmp/atuin-install.sh
+    creates: "{{ atuin_home }}/.atuin/bin/atuin"
+  environment:
+    HOME: "{{ atuin_home }}"
+    USER: "{{ atuin_user }}"
+    LOGNAME: "{{ atuin_user }}"
+    ATUIN_INSTALL_DIR: "{{ atuin_home }}/.atuin/bin"
+  become: false
+  vars:
+    atuin_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    atuin_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ atuin_user, true) }}"
 
 - name: Manage user .bashrc
   ansible.builtin.copy:
