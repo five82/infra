@@ -35,6 +35,11 @@
     group: "{{ ansible_user_id }}"
     mode: "0644"
 
+- name: Set system timezone to America/New_York
+  ansible.builtin.command:
+    cmd: timedatectl set-timezone America/New_York
+  changed_when: false
+
 - name: Ensure mount points exist
   ansible.builtin.file:
     path: "{{ item }}"
