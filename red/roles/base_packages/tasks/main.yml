@@ -17,6 +17,7 @@
       - fuse3
       - nfs-kernel-server
       - samba
+      - unattended-upgrades
     state: present
 
 - name: Download Starship installer
@@ -24,6 +25,17 @@
     url: https://starship.rs/install.sh
     dest: /tmp/starship-install.sh
     mode: "0755"
+
+- name: Configure unattended upgrades
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/apt/apt.conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - 20auto-upgrades
+    - 50unattended-upgrades
 
 - name: Install Starship
   ansible.builtin.command:
