@@ -5,4 +5,9 @@
   gather_facts: true
 
   roles:
+    - tailscale
     - base_packages
+    - storage
+    - snapraid
+    - nfs
+    - samba

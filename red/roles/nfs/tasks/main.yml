@@ -1,0 +1,26 @@
+---
+- name: Install NFS server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+
+- name: Ensure NFS exports.d directory exists
+  ansible.builtin.file:
+    path: /etc/exports.d
+    state: directory
+    mode: "0755"
+
+- name: Install NFS export for daspool
+  ansible.builtin.template:
+    src: daspool.exports.j2
+    dest: /etc/exports.d/daspool.exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload NFS exports
+
+- name: Enable and start NFS server
+  ansible.builtin.systemd:
+    name: nfs-kernel-server
+    enabled: true
+    state: started

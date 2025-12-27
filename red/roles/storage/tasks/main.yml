@@ -1,0 +1,54 @@
+---
+- name: Install storage packages
+  ansible.builtin.apt:
+    name:
+      - mergerfs
+      - fuse3
+    state: present
+
+- name: Ensure mount points exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /mnt/das1
+    - /mnt/das2
+    - /mnt/das3
+    - /mnt/parity1
+    - /media/daspool
+
+- name: Mount data disks
+  ansible.builtin.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+  loop:
+    - { path: /mnt/das1, src: "LABEL=das1" }
+    - { path: /mnt/das2, src: "LABEL=das2" }
+    - { path: /mnt/das3, src: "LABEL=das3" }
+
+- name: Mount parity disk
+  ansible.builtin.mount:
+    path: /mnt/parity1
+    src: "LABEL=parity1"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+
+- name: Allow FUSE allow_other
+  ansible.builtin.lineinfile:
+    path: /etc/fuse.conf
+    regexp: '^#?user_allow_other'
+    line: 'user_allow_other'
+    state: present
+
+- name: Mount mergerfs pool
+  ansible.builtin.mount:
+    path: /media/daspool
+    src: /mnt/das1:/mnt/das2:/mnt/das3
+    fstype: fuse.mergerfs
+    opts: defaults,allow_other,use_ino,category.create=mfs,moveonenospc=true
+    state: mounted

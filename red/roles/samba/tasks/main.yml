@@ -1,0 +1,58 @@
+---
+- name: Install Samba
+  ansible.builtin.apt:
+    name: samba
+    state: present
+
+- name: Ensure Samba config include directory exists
+  ansible.builtin.file:
+    path: /etc/samba/smb.conf.d
+    state: directory
+    mode: "0755"
+
+- name: Remove any existing Samba conf.d include lines
+  ansible.builtin.replace:
+    path: /etc/samba/smb.conf
+    regexp: '^[;#]?\\s*include\\s*=\\s*/etc/samba/smb\\.conf\\.d/.*$\\n?'
+    replace: ''
+  notify: Restart Samba
+
+- name: Ensure Samba includes conf.d in [global]
+  ansible.builtin.ini_file:
+    path: /etc/samba/smb.conf
+    section: global
+    option: include
+    value: /etc/samba/smb.conf.d/daspool.conf
+  notify: Restart Samba
+
+- name: Install Samba share for daspool
+  ansible.builtin.template:
+    src: daspool.smb.conf.j2
+    dest: /etc/samba/smb.conf.d/daspool.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Samba
+
+- name: Ensure Samba services are enabled and started
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - smbd
+    - nmbd
+
+- name: Check for Samba user
+  ansible.builtin.command:
+    cmd: pdbedit -L
+  register: samba_users
+  changed_when: false
+
+- name: Ensure Samba user exists and has password
+  ansible.builtin.command:
+    cmd: smbpasswd -s -a ken
+  args:
+    stdin: "{{ smb_password }}\n{{ smb_password }}\n"
+  when: "'ken:' not in samba_users.stdout"
+  no_log: true

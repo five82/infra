@@ -1,0 +1,36 @@
+---
+- name: Install snapraid
+  ansible.builtin.apt:
+    name: snapraid
+    state: present
+
+- name: Install snapraid configuration
+  ansible.builtin.template:
+    src: snapraid.conf.j2
+    dest: /etc/snapraid.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install snapraid systemd units
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - snapraid-sync.service
+    - snapraid-sync.timer
+    - snapraid-scrub.service
+    - snapraid-scrub.timer
+  notify: Reload systemd
+
+- name: Enable and start snapraid timers
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - snapraid-sync.timer
+    - snapraid-scrub.timer

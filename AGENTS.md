@@ -13,6 +13,7 @@
 - Prefer minimal, clear changes.
 - Keep environment-specific differences confined to their respective directories.
 - When adding packages, update the base packages role for the target environment.
+- Prefer proper role separation; avoid piling unrelated concerns into base_packages.
 - Avoid changing storage, mount, or filesystem settings on **red** unless explicitly requested.
 - Avoid altering quadlet definitions or container volumes on **blue** unless explicitly requested.
 

@@ -1,0 +1,37 @@
+---
+- name: Ensure Tailscale keyring directory exists
+  ansible.builtin.file:
+    path: /usr/share/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Install Tailscale repository key
+  ansible.builtin.get_url:
+    url: https://pkgs.tailscale.com/stable/raspbian/trixie.noarmor.gpg
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: "0644"
+  register: tailscale_key
+
+- name: Install Tailscale repository list
+  ansible.builtin.get_url:
+    url: https://pkgs.tailscale.com/stable/raspbian/trixie.tailscale-keyring.list
+    dest: /etc/apt/sources.list.d/tailscale.list
+    mode: "0644"
+  register: tailscale_list
+
+- name: Update apt cache after adding Tailscale repo
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 0
+  when: tailscale_key.changed or tailscale_list.changed
+
+- name: Install Tailscale
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+
+- name: Ensure Tailscale daemon is enabled and started
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: true
+    state: started
