@@ -1,0 +1,65 @@
+---
+- name: Fail if no sudo user for Jellyfin config
+  ansible.builtin.fail:
+    msg: "Refusing to manage Jellyfin config under HOME without SUDO_USER; run via sudo as the target user."
+  when:
+    - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
+    - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
+  become: false
+
+- name: Set Jellyfin user fact
+  ansible.builtin.set_fact:
+    jellyfin_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+
+- name: Read Jellyfin user entry
+  ansible.builtin.command:
+    cmd: "getent passwd {{ jellyfin_user }}"
+  changed_when: false
+  register: jellyfin_getent
+
+- name: Set Jellyfin home/uid/gid facts
+  ansible.builtin.set_fact:
+    jellyfin_home: "{{ jellyfin_getent.stdout.split(':')[5] }}"
+    jellyfin_uid: "{{ jellyfin_getent.stdout.split(':')[2] }}"
+    jellyfin_gid: "{{ jellyfin_getent.stdout.split(':')[3] }}"
+
+- name: Ensure Jellyfin config/cache directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ jellyfin_uid }}"
+    group: "{{ jellyfin_gid }}"
+    mode: "0755"
+  loop:
+    - "{{ jellyfin_home }}/.jellyfin"
+    - "{{ jellyfin_home }}/.jellyfin/config"
+    - "{{ jellyfin_home }}/.jellyfin/cache"
+
+- name: Ensure quadlet directory exists
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Jellyfin quadlet
+  ansible.builtin.template:
+    src: jellyfin.container.j2
+    dest: /etc/containers/systemd/jellyfin.container
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    jellyfin_config_dir: "{{ jellyfin_home }}/.jellyfin/config"
+    jellyfin_cache_dir: "{{ jellyfin_home }}/.jellyfin/cache"
+  notify: Reload systemd
+
+- name: Flush systemd reload handler
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Jellyfin
+  ansible.builtin.systemd:
+    name: jellyfin.service
+    enabled: true
+    state: started
