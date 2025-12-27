@@ -60,6 +60,14 @@
     atuin_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
     atuin_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ atuin_user, true) }}"
 
+- name: Fail if no sudo user for .bashrc install
+  ansible.builtin.fail:
+    msg: "Refusing to manage .bashrc without SUDO_USER; run via sudo as the target user."
+  when:
+    - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
+    - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
+  become: false
+
 - name: Manage user .bashrc
   ansible.builtin.copy:
     src: bashrc
