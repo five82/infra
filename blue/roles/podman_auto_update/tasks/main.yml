@@ -1,0 +1,6 @@
+---
+- name: Enable Podman auto-update timer
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started

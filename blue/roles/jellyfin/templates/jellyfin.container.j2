@@ -6,6 +6,7 @@ Image=docker.io/jellyfin/jellyfin:latest
 ContainerName=jellyfin
 User=1000:1000
 GroupAdd=keep-groups
+Label=io.containers.autoupdate=registry
 PublishPort=8096:8096/tcp
 PublishPort=7359:7359/udp
 PublishPort=1900:1900/udp
