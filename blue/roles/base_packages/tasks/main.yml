@@ -64,10 +64,14 @@
 - name: Manage user .bashrc
   ansible.builtin.copy:
     src: bashrc
-    dest: "{{ ansible_env.HOME }}/.bashrc"
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
+    dest: "{{ bashrc_home }}/.bashrc"
+    owner: "{{ bashrc_user }}"
+    group: "{{ bashrc_user }}"
     mode: "0644"
+  become: false
+  vars:
+    bashrc_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    bashrc_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ bashrc_user, true) }}"
 
 - name: Set system timezone to America/New_York
   ansible.builtin.command:
