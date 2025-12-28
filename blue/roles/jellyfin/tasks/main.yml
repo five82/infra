@@ -72,3 +72,4 @@
     name: jellyfin.service
     enabled: true
     state: started
+    daemon_reload: true
