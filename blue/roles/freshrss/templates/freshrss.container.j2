@@ -1,0 +1,15 @@
+[Unit]
+Description=FreshRSS
+
+[Container]
+Image=lscr.io/linuxserver/freshrss:latest
+ContainerName=freshrss
+Label=io.containers.autoupdate=registry
+Environment=PUID={{ freshrss_uid }}
+Environment=PGID={{ freshrss_gid }}
+Environment=TZ=Etc/UTC
+Volume=freshrss-config:/config
+PublishPort=20009:80/tcp
+
+[Service]
+Restart=always

@@ -1,0 +1,52 @@
+---
+- name: Fail if no sudo user for FreshRSS config
+  ansible.builtin.fail:
+    msg: "Refusing to manage FreshRSS config under HOME without SUDO_USER; run via sudo as the target user."
+  when:
+    - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
+    - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
+  become: false
+
+- name: Set FreshRSS user fact
+  ansible.builtin.set_fact:
+    freshrss_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+
+- name: Read FreshRSS user entry
+  ansible.builtin.command:
+    cmd: "getent passwd {{ freshrss_user }}"
+  changed_when: false
+  register: freshrss_getent
+
+- name: Set FreshRSS uid/gid facts
+  ansible.builtin.set_fact:
+    freshrss_uid: "{{ freshrss_getent.stdout.split(':')[2] }}"
+    freshrss_gid: "{{ freshrss_getent.stdout.split(':')[3] }}"
+
+- name: Ensure quadlet directory exists
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install FreshRSS quadlet
+  ansible.builtin.template:
+    src: freshrss.container.j2
+    dest: /etc/containers/systemd/freshrss.container
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart FreshRSS
+
+- name: Flush systemd reload handler
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start FreshRSS
+  ansible.builtin.systemd:
+    name: freshrss.service
+    enabled: true
+    state: started
+    daemon_reload: true

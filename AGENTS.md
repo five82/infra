@@ -16,6 +16,7 @@
 - Prefer proper role separation; avoid piling unrelated concerns into base_packages.
 - Avoid changing storage, mount, or filesystem settings on **red** unless explicitly requested.
 - Avoid altering quadlet definitions or container volumes on **blue** unless explicitly requested.
+- Containers should use Podman named volumes and include the auto-update label.
 
 ## Ansible
 - Playbooks live under each environment's `playbooks/`.
@@ -29,6 +30,7 @@
 ## Validation
 - Prefer `ansible-playbook --check` for dry runs when unsure.
 - Call out any expected service restarts or downtime.
+- When adding or updating quadlets, ensure systemd daemon reload happens before enabling/starting the generated service.
 
 ## Operational constraints
 - Assume headless operation.
