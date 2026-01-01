@@ -1,0 +1,2 @@
+# Encrypted with ansible-vault in your repo copy
+caddy_cloudflare_api_token: "CHANGE_ME"

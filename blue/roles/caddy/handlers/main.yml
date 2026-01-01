@@ -1,21 +1,22 @@
 ---
-- name: Reload systemd
+- name: Reload systemd (caddy)
+  listen: caddy reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
 
-- name: Restart Caddy
-  block:
-    - name: Check Caddy unit load state
-      ansible.builtin.command:
-        cmd: systemctl show -p LoadState caddy.service
-      changed_when: false
-      failed_when: false
-      register: caddy_load_state
+- name: Check Caddy unit load state
+  listen: caddy restart
+  ansible.builtin.command:
+    cmd: systemctl show -p LoadState caddy.service
+  changed_when: false
+  failed_when: false
+  register: caddy_load_state
 
-    - name: Restart Caddy service
-      ansible.builtin.systemd:
-        name: caddy.service
-        state: restarted
-      when:
-        - caddy_load_state.stdout is defined
-        - "'LoadState=not-found' not in caddy_load_state.stdout"
+- name: Restart Caddy service
+  listen: caddy restart
+  ansible.builtin.systemd:
+    name: caddy.service
+    state: restarted
+  when:
+    - caddy_load_state.stdout is defined
+    - "'LoadState=not-found' not in caddy_load_state.stdout"
