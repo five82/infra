@@ -1,0 +1,16 @@
+[Unit]
+Description=Caddy
+
+[Container]
+Image=docker.io/library/caddy:latest
+ContainerName=caddy
+Label=io.containers.autoupdate=registry
+PublishPort=80:80/tcp
+PublishPort=443:443/tcp
+PublishPort=443:443/udp
+Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+Volume=caddy-data:/data
+Volume=caddy-config:/config
+
+[Service]
+Restart=always

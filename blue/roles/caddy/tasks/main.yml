@@ -1,0 +1,46 @@
+---
+- name: Ensure Caddy configuration directory exists
+  ansible.builtin.file:
+    path: /etc/caddy
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Caddyfile
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: /etc/caddy/Caddyfile
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Caddy
+
+- name: Ensure quadlet directory exists
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install Caddy quadlet
+  ansible.builtin.template:
+    src: caddy.container.j2
+    dest: /etc/containers/systemd/caddy.container
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart Caddy
+
+- name: Flush systemd reload handler
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Caddy
+  ansible.builtin.systemd:
+    name: caddy.service
+    enabled: true
+    state: started
+    daemon_reload: true
