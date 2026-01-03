@@ -1,0 +1,15 @@
+# Managed by Ansible
+
+parity {{ snapraid_parity_path }}
+
+{% for content_path in snapraid_content_paths %}
+content {{ content_path }}
+{% endfor %}
+
+{% for disk in snapraid_data_disks %}
+data {{ disk.name }} {{ disk.path }}
+{% endfor %}
+
+{% for exclude in snapraid_excludes %}
+exclude {{ exclude }}
+{% endfor %}
