@@ -41,10 +41,10 @@ def deploy(config):
             commands=["exportfs -ra"],
         )
 
-    # Enable and start NFS server
+    # Enable and start NFS server (use nfs-server, not the alias nfs-kernel-server)
     systemd.service(
         name="Enable and start NFS server",
-        service="nfs-kernel-server",
+        service="nfs-server",
         enabled=True,
         running=True,
     )

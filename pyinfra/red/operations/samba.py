@@ -32,7 +32,6 @@ def deploy(config):
         name="Ensure Samba includes daspool.conf",
         path="/etc/samba/smb.conf",
         line="   include = /etc/samba/smb.conf.d/daspool.conf",
-        insertafter="\\[global\\]",
     )
 
     # Deploy share config template

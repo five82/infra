@@ -1,6 +1,8 @@
 """Storage configuration - mergerfs and disk mounts."""
 
+from pyinfra import host
 from pyinfra.operations import apt, files, server
+from pyinfra.facts.server import Mounts
 
 
 def deploy(config):
@@ -34,27 +36,35 @@ def deploy(config):
         mode="0755",
     )
 
-    # Mount data disks
-    for disk in config.data_disks:
-        server.mount(
-            name=f"Mount data disk: {disk['label']}",
-            path=disk["path"],
-            device=f"LABEL={disk['label']}",
-            fs_type="xfs",
-            options=["defaults"],
-            mounted=True,
-        )
+    # Get current mounts for idempotency checks
+    current_mounts = host.get_fact(Mounts)
 
-    # Mount parity disk
-    server.mount(
-        name="Mount parity disk",
-        path=config.parity_disk["path"],
-        device=f"LABEL={config.parity_disk['label']}",
-        fstype="xfs",
-        options=["defaults"],
-        mounted=True,
-        permanent=True,
+    # Mount data disks (fstab + mount if not mounted)
+    for disk in config.data_disks:
+        fstab_entry = f"LABEL={disk['label']} {disk['path']} xfs defaults 0 0"
+        files.line(
+            name=f"Add data disk to fstab: {disk['label']}",
+            path="/etc/fstab",
+            line=fstab_entry,
+        )
+        if disk["path"] not in current_mounts:
+            server.shell(
+                name=f"Mount data disk: {disk['label']}",
+                commands=[f"mount {disk['path']}"],
+            )
+
+    # Mount parity disk (fstab + mount if not mounted)
+    parity_fstab = f"LABEL={config.parity_disk['label']} {config.parity_disk['path']} xfs defaults 0 0"
+    files.line(
+        name="Add parity disk to fstab",
+        path="/etc/fstab",
+        line=parity_fstab,
     )
+    if config.parity_disk["path"] not in current_mounts:
+        server.shell(
+            name="Mount parity disk",
+            commands=[f"mount {config.parity_disk['path']}"],
+        )
 
     # Configure FUSE allow_other
     files.line(
@@ -64,13 +74,17 @@ def deploy(config):
         replace="^#?user_allow_other.*",
     )
 
-    # Mount mergerfs pool
-    server.mount(
-        name="Mount mergerfs pool",
-        path=config.pool_path,
-        device=config.pool_sources,
-        fs_type="fuse.mergerfs",
-        options=config.pool_opts.split(","),
-        mounted=True,
-        permanent=True,
+    # Add mergerfs pool to fstab directly (server.mount doesn't handle FUSE well)
+    fstab_line = f"{config.pool_sources} {config.pool_path} fuse.mergerfs {config.pool_opts} 0 0"
+    files.line(
+        name="Add mergerfs pool to fstab",
+        path="/etc/fstab",
+        line=fstab_line,
     )
+
+    # Mount mergerfs pool if not already mounted
+    if config.pool_path not in current_mounts:
+        server.shell(
+            name="Mount mergerfs pool",
+            commands=[f"mount {config.pool_path}"],
+        )
