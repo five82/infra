@@ -1,4 +1,5 @@
 ---
-- name: Reload systemd
+- name: Reload systemd (snapraid)
+  listen: reload systemd
   ansible.builtin.systemd:
     daemon_reload: true

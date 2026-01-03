@@ -1,0 +1,6 @@
+---
+# NVM version to install
+nodejs_nvm_version: v0.40.3
+
+# Node.js major version to install
+nodejs_version: 25

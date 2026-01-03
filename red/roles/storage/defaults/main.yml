@@ -1,0 +1,21 @@
+---
+# Storage packages to install
+storage_packages:
+  - mergerfs
+  - fuse3
+
+# Data disks configuration
+storage_data_disks:
+  - { path: /mnt/das1, label: das1 }
+  - { path: /mnt/das2, label: das2 }
+  - { path: /mnt/das3, label: das3 }
+
+# Parity disk configuration
+storage_parity_disk:
+  path: /mnt/parity1
+  label: parity1
+
+# MergerFS pool configuration
+storage_pool_path: /media/daspool
+storage_pool_sources: /mnt/das1:/mnt/das2:/mnt/das3
+storage_pool_opts: defaults,allow_other,use_ino,category.create=mfs,moveonenospc=true

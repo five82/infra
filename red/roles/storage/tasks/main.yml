@@ -1,42 +1,62 @@
 ---
 - name: Install storage packages
   ansible.builtin.apt:
-    name:
-      - mergerfs
-      - fuse3
+    name: "{{ storage_packages }}"
     state: present
+  tags:
+    - storage
+    - apt
 
-- name: Ensure mount points exist
+- name: Ensure data disk mount points exist
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item.path }}"
     state: directory
     mode: "0755"
-  loop:
-    - /mnt/das1
-    - /mnt/das2
-    - /mnt/das3
-    - /mnt/parity1
-    - /media/daspool
+  loop: "{{ storage_data_disks }}"
+  tags:
+    - storage
+    - mounts
+
+- name: Ensure parity disk mount point exists
+  ansible.builtin.file:
+    path: "{{ storage_parity_disk.path }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - storage
+    - mounts
+
+- name: Ensure pool mount point exists
+  ansible.builtin.file:
+    path: "{{ storage_pool_path }}"
+    state: directory
+    mode: "0755"
+  tags:
+    - storage
+    - mounts
 
 - name: Mount data disks
   ansible.builtin.mount:
     path: "{{ item.path }}"
-    src: "{{ item.src }}"
+    src: "LABEL={{ item.label }}"
     fstype: xfs
     opts: defaults
     state: mounted
-  loop:
-    - { path: /mnt/das1, src: "LABEL=das1" }
-    - { path: /mnt/das2, src: "LABEL=das2" }
-    - { path: /mnt/das3, src: "LABEL=das3" }
+  loop: "{{ storage_data_disks }}"
+  tags:
+    - storage
+    - mounts
 
 - name: Mount parity disk
   ansible.builtin.mount:
-    path: /mnt/parity1
-    src: "LABEL=parity1"
+    path: "{{ storage_parity_disk.path }}"
+    src: "LABEL={{ storage_parity_disk.label }}"
     fstype: xfs
     opts: defaults
     state: mounted
+  tags:
+    - storage
+    - mounts
 
 - name: Allow FUSE allow_other
   ansible.builtin.lineinfile:
@@ -44,11 +64,17 @@
     regexp: '^#?user_allow_other'
     line: 'user_allow_other'
     state: present
+  tags:
+    - storage
+    - config
 
 - name: Mount mergerfs pool
   ansible.builtin.mount:
-    path: /media/daspool
-    src: /mnt/das1:/mnt/das2:/mnt/das3
+    path: "{{ storage_pool_path }}"
+    src: "{{ storage_pool_sources }}"
     fstype: fuse.mergerfs
-    opts: defaults,allow_other,use_ino,category.create=mfs,moveonenospc=true
+    opts: "{{ storage_pool_opts }}"
     state: mounted
+  tags:
+    - storage
+    - mounts

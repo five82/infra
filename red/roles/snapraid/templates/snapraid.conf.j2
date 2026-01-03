@@ -1,14 +1,15 @@
 # Managed by Ansible
 
-parity /mnt/parity1/snapraid.parity
+parity {{ snapraid_parity_path }}
 
-content /mnt/das1/snapraid.content
-content /mnt/das2/snapraid.content
-content /mnt/das3/snapraid.content
-content /mnt/parity1/snapraid.content
+{% for content_path in snapraid_content_paths %}
+content {{ content_path }}
+{% endfor %}
 
-data d1 /mnt/das1
-data d2 /mnt/das2
-data d3 /mnt/das3
+{% for disk in snapraid_data_disks %}
+data {{ disk.name }} {{ disk.path }}
+{% endfor %}
 
-exclude /lost+found/
+{% for exclude in snapraid_excludes %}
+exclude {{ exclude }}
+{% endfor %}

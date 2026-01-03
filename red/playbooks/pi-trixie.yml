@@ -5,10 +5,24 @@
   gather_facts: true
 
   roles:
-    - tailscale
-    - base_packages
-    - nodejs
-    - storage
-    - snapraid
-    - nfs
-    - samba
+    - role: tailscale
+      tags:
+        - tailscale
+    - role: base_packages
+      tags:
+        - base_packages
+    - role: nodejs
+      tags:
+        - nodejs
+    - role: storage
+      tags:
+        - storage
+    - role: snapraid
+      tags:
+        - snapraid
+    - role: nfs
+      tags:
+        - nfs
+    - role: samba
+      tags:
+        - samba

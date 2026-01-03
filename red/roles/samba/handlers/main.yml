@@ -1,5 +1,6 @@
 ---
-- name: Restart Samba
+- name: Restart Samba services (samba)
+  listen: restart samba
   ansible.builtin.systemd:
     name: "{{ item }}"
     state: restarted

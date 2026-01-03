@@ -3,6 +3,9 @@
   ansible.builtin.apt:
     name: snapraid
     state: present
+  tags:
+    - snapraid
+    - apt
 
 - name: Install snapraid configuration
   ansible.builtin.template:
@@ -11,6 +14,9 @@
     owner: root
     group: root
     mode: "0644"
+  tags:
+    - snapraid
+    - config
 
 - name: Install snapraid systemd units
   ansible.builtin.copy:
@@ -19,18 +25,23 @@
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - snapraid-sync.service
-    - snapraid-sync.timer
-    - snapraid-scrub.service
-    - snapraid-scrub.timer
-  notify: Reload systemd
+  loop: "{{ snapraid_systemd_units }}"
+  notify: reload systemd
+  tags:
+    - snapraid
+    - systemd
+
+- name: Flush systemd reload handler
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - snapraid
 
 - name: Enable and start snapraid timers
   ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
     state: started
-  loop:
-    - snapraid-sync.timer
-    - snapraid-scrub.timer
+  loop: "{{ snapraid_timers }}"
+  tags:
+    - snapraid
+    - systemd

@@ -1,0 +1,6 @@
+---
+# NFS exports configuration
+nfs_exports:
+  - path: /media/daspool
+    clients: "10.100.90.0/24"
+    options: "rw,async,no_subtree_check,fsid=0"
