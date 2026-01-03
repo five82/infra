@@ -1,8 +1,0 @@
-{{ caddy_jellyfin_domain }} {
-    tls {
-        dns cloudflare {env.CF_API_TOKEN}
-    }
-
-    # Jellyfin upstream
-    reverse_proxy {{ caddy_jellyfin_upstream }}
-}

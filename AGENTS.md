@@ -6,10 +6,8 @@
 - Both are Raspberry Pi 5 boxes running Raspberry Pi OS Trixie.
 
 ## Repo layout
-- `pyinfra/red/`: NAS server configuration (primary).
-- `pyinfra/blue/`: Podman quadlets server configuration (primary).
-- `red/`: Legacy Ansible playbooks (reference only).
-- `blue/`: Legacy Ansible playbooks (reference only).
+- `pyinfra/red/`: NAS server configuration.
+- `pyinfra/blue/`: Podman quadlets server configuration.
 
 ## Conventions
 - Prefer minimal, clear changes.
@@ -44,8 +42,3 @@
 
 ## Notes
 - Jellyfin runs on **blue** via Podman quadlets.
-
-## Legacy Ansible (reference only)
-- Ansible playbooks in `red/` and `blue/` are kept for reference.
-- New changes should be made to pyinfra, not Ansible.
-- Ansible secrets used `vault.yml` (encrypted); pyinfra uses `secrets.py` (gitignored).

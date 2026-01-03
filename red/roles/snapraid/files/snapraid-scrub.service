@@ -1,7 +1,0 @@
-[Unit]
-Description=SnapRAID Scrub (10%)
-After=local-fs.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/snapraid scrub -p 10

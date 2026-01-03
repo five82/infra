@@ -1,9 +1,0 @@
-[Unit]
-Description=SnapRAID monthly scrub (10%)
-
-[Timer]
-OnCalendar=*-*-01 04:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target

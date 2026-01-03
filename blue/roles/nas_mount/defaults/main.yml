@@ -1,6 +1,0 @@
----
-# NAS mount configuration
-nas_mount_server: 10.100.90.3
-nas_mount_path: /
-nas_mount_point: /media/daspool
-nas_mount_opts: noauto,x-systemd.automount,_netdev,nofail,hard,timeo=600,retrans=2
