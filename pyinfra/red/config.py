@@ -20,6 +20,7 @@ class Config:
         "bash-completion",
         "ripgrep",
         "btop",
+        "tree",
         "unattended-upgrades",
     ])
 

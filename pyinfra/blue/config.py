@@ -21,6 +21,7 @@ class Config:
         "ripgrep",
         "btop",
         "podman",
+        "tree",
         "unattended-upgrades",
         "nfs-common",
     ])
