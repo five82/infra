@@ -1,0 +1,16 @@
+---
+# System timezone
+base_packages_timezone: America/New_York
+
+# Base packages to install
+base_packages_apt:
+  - git
+  - gh
+  - neovim
+  - curl
+  - bash-completion
+  - ripgrep
+  - btop
+  - podman
+  - unattended-upgrades
+  - nfs-common

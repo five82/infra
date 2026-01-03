@@ -2,19 +2,20 @@
 Description=Jellyfin
 
 [Container]
-Image=docker.io/jellyfin/jellyfin:latest
+Image={{ jellyfin_image }}
 ContainerName=jellyfin
-User=1000:1000
+User={{ jellyfin_uid }}:{{ jellyfin_gid }}
 GroupAdd=keep-groups
 Label=io.containers.autoupdate=registry
-PublishPort=8096:8096/tcp
-PublishPort=7359:7359/udp
-PublishPort=1900:1900/udp
-AddDevice=/dev/video19
-AddDevice=/dev/dri/renderD128
+PublishPort={{ jellyfin_http_port }}:8096/tcp
+PublishPort={{ jellyfin_autodiscovery_port }}:7359/udp
+PublishPort={{ jellyfin_dlna_port }}:1900/udp
+{% for device in jellyfin_devices %}
+AddDevice={{ device }}
+{% endfor %}
 Volume={{ jellyfin_config_dir }}:/config
 Volume={{ jellyfin_cache_dir }}:/cache
-Volume=/media/daspool/media:/media
+Volume={{ jellyfin_media_path }}:/media
 
 [Service]
 Restart=always

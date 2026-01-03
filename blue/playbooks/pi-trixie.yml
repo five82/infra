@@ -5,11 +5,27 @@
   gather_facts: true
 
   roles:
-    - tailscale
-    - base_packages
-    - podman_auto_update
-    - nas_mount
-    - nodejs
-    - jellyfin
-    - freshrss
-    - caddy
+    - role: tailscale
+      tags:
+        - tailscale
+    - role: base_packages
+      tags:
+        - base_packages
+    - role: podman_auto_update
+      tags:
+        - podman_auto_update
+    - role: nas_mount
+      tags:
+        - nas_mount
+    - role: nodejs
+      tags:
+        - nodejs
+    - role: jellyfin
+      tags:
+        - jellyfin
+    - role: freshrss
+      tags:
+        - freshrss
+    - role: caddy
+      tags:
+        - caddy

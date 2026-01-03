@@ -1,0 +1,4 @@
+---
+# Tailscale repository configuration
+tailscale_distro: raspbian
+tailscale_release: trixie

@@ -6,22 +6,33 @@
     - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
     - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
   become: false
+  tags:
+    - jellyfin
 
 - name: Set Jellyfin user fact
   ansible.builtin.set_fact:
     jellyfin_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+  tags:
+    - jellyfin
+    - facts
 
 - name: Read Jellyfin user entry
   ansible.builtin.command:
     cmd: "getent passwd {{ jellyfin_user }}"
   changed_when: false
   register: jellyfin_getent
+  tags:
+    - jellyfin
+    - facts
 
 - name: Set Jellyfin home/uid/gid facts
   ansible.builtin.set_fact:
     jellyfin_home: "{{ jellyfin_getent.stdout.split(':')[5] }}"
     jellyfin_uid: "{{ jellyfin_getent.stdout.split(':')[2] }}"
     jellyfin_gid: "{{ jellyfin_getent.stdout.split(':')[3] }}"
+  tags:
+    - jellyfin
+    - facts
 
 - name: Ensure Jellyfin user is in video group
   ansible.builtin.user:
@@ -29,6 +40,8 @@
     groups:
       - video
     append: true
+  tags:
+    - jellyfin
 
 - name: Ensure Jellyfin config/cache directories exist
   ansible.builtin.file:
@@ -41,6 +54,8 @@
     - "{{ jellyfin_home }}/.jellyfin"
     - "{{ jellyfin_home }}/.jellyfin/config"
     - "{{ jellyfin_home }}/.jellyfin/cache"
+  tags:
+    - jellyfin
 
 - name: Ensure quadlet directory exists
   ansible.builtin.file:
@@ -49,6 +64,9 @@
     owner: root
     group: root
     mode: "0755"
+  tags:
+    - jellyfin
+    - quadlet
 
 - name: Install Jellyfin quadlet
   ansible.builtin.template:
@@ -61,15 +79,21 @@
     jellyfin_config_dir: "{{ jellyfin_home }}/.jellyfin/config"
     jellyfin_cache_dir: "{{ jellyfin_home }}/.jellyfin/cache"
   notify:
-    - Reload systemd
-    - Restart Jellyfin
+    - reload systemd
+    - restart jellyfin
+  tags:
+    - jellyfin
+    - quadlet
 
 - name: Flush systemd reload handler
   ansible.builtin.meta: flush_handlers
+  tags:
+    - jellyfin
 
 - name: Enable and start Jellyfin
   ansible.builtin.systemd:
     name: jellyfin.service
     enabled: true
     state: started
-    daemon_reload: true
+  tags:
+    - jellyfin

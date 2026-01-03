@@ -1,26 +1,35 @@
 ---
+- name: Set target user facts
+  ansible.builtin.set_fact:
+    target_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    target_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true), true) }}"
+  tags:
+    - nodejs
+    - facts
+
 - name: Install nvm
   ansible.builtin.shell:
-    cmd: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash"
-    creates: "{{ nvm_home }}/.nvm/nvm.sh"
+    cmd: "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/{{ nodejs_nvm_version }}/install.sh | bash"
+    creates: "{{ target_home }}/.nvm/nvm.sh"
     executable: /bin/bash
   environment:
-    HOME: "{{ nvm_home }}"
-    NVM_DIR: "{{ nvm_home }}/.nvm"
+    HOME: "{{ target_home }}"
+    NVM_DIR: "{{ target_home }}/.nvm"
   become: false
-  vars:
-    nvm_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
-    nvm_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ nvm_user, true) }}"
+  tags:
+    - nodejs
+    - nvm
 
-- name: Install Node.js 25 via nvm
+- name: Install Node.js via nvm
   ansible.builtin.shell:
-    cmd: "source {{ nvm_home }}/.nvm/nvm.sh && nvm install 25"
-    creates: "{{ nvm_home }}/.nvm/versions/node/v25.2.1/bin/node"
+    cmd: "source {{ target_home }}/.nvm/nvm.sh && nvm install {{ nodejs_version }}"
     executable: /bin/bash
+  args:
+    creates: "{{ target_home }}/.nvm/versions/node/v{{ nodejs_version }}.*"
   environment:
-    HOME: "{{ nvm_home }}"
-    NVM_DIR: "{{ nvm_home }}/.nvm"
+    HOME: "{{ target_home }}"
+    NVM_DIR: "{{ target_home }}/.nvm"
   become: false
-  vars:
-    nvm_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
-    nvm_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ nvm_user, true) }}"
+  tags:
+    - nodejs
+    - nvm

@@ -6,6 +6,8 @@
     owner: root
     group: root
     mode: "0755"
+  tags:
+    - caddy
 
 - name: Fail if Cloudflare API token is missing
   ansible.builtin.assert:
@@ -13,6 +15,8 @@
       - caddy_cloudflare_api_token is defined
       - caddy_cloudflare_api_token | length > 0
     fail_msg: "Set caddy_cloudflare_api_token (recommend Ansible Vault) before configuring Caddy."
+  tags:
+    - caddy
 
 - name: Install Caddy env file
   ansible.builtin.template:
@@ -21,7 +25,11 @@
     owner: root
     group: root
     mode: "0600"
-  notify: caddy restart
+  notify:
+    - reload systemd
+    - restart caddy
+  tags:
+    - caddy
 
 - name: Install Caddyfile
   ansible.builtin.template:
@@ -30,7 +38,11 @@
     owner: root
     group: root
     mode: "0644"
-  notify: caddy restart
+  notify:
+    - reload systemd
+    - restart caddy
+  tags:
+    - caddy
 
 - name: Ensure quadlet directory exists
   ansible.builtin.file:
@@ -39,6 +51,9 @@
     owner: root
     group: root
     mode: "0755"
+  tags:
+    - caddy
+    - quadlet
 
 - name: Install Caddy quadlet
   ansible.builtin.template:
@@ -48,15 +63,21 @@
     group: root
     mode: "0644"
   notify:
-    - caddy reload systemd
-    - caddy restart
+    - reload systemd
+    - restart caddy
+  tags:
+    - caddy
+    - quadlet
 
 - name: Flush systemd reload handler
   ansible.builtin.meta: flush_handlers
+  tags:
+    - caddy
 
 - name: Enable and start Caddy
   ansible.builtin.systemd:
     name: caddy.service
     enabled: true
     state: started
-    daemon_reload: true
+  tags:
+    - caddy

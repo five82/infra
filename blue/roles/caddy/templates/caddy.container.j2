@@ -2,7 +2,7 @@
 Description=Caddy
 
 [Container]
-Image=ghcr.io/caddybuilds/caddy-cloudflare:latest
+Image={{ caddy_image }}
 ContainerName=caddy
 Label=io.containers.autoupdate=registry
 EnvironmentFile=/etc/caddy/caddy.env

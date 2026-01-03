@@ -1,29 +1,36 @@
 ---
+- name: Set target user facts
+  ansible.builtin.set_fact:
+    target_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
+    target_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true), true) }}"
+  tags:
+    - base_packages
+    - facts
+
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
+  tags:
+    - base_packages
+    - apt
 
 - name: Install base packages
   ansible.builtin.apt:
-    name:
-      - git
-      - gh
-      - neovim
-      - curl
-      - bash-completion
-      - ripgrep
-      - btop
-      - podman
-      - unattended-upgrades
-      - nfs-common
+    name: "{{ base_packages_apt }}"
     state: present
+  tags:
+    - base_packages
+    - apt
 
 - name: Download Starship installer
   ansible.builtin.get_url:
     url: https://starship.rs/install.sh
     dest: /tmp/starship-install.sh
     mode: "0755"
+  tags:
+    - base_packages
+    - starship
 
 - name: Configure unattended upgrades
   ansible.builtin.copy:
@@ -35,11 +42,17 @@
   loop:
     - 20auto-upgrades
     - 50unattended-upgrades
+  tags:
+    - base_packages
+    - unattended_upgrades
 
 - name: Install Starship
   ansible.builtin.command:
     cmd: /tmp/starship-install.sh -y
     creates: /usr/local/bin/starship
+  tags:
+    - base_packages
+    - starship
 
 - name: Download Atuin installer
   ansible.builtin.get_url:
@@ -47,42 +60,61 @@
     dest: /tmp/atuin-install.sh
     mode: "0755"
   become: false
+  tags:
+    - base_packages
+    - atuin
 
 - name: Install Atuin
   ansible.builtin.command:
     cmd: /bin/sh /tmp/atuin-install.sh
-    creates: "{{ atuin_home }}/.atuin/bin/atuin"
+    creates: "{{ target_home }}/.atuin/bin/atuin"
   environment:
-    HOME: "{{ atuin_home }}"
-    USER: "{{ atuin_user }}"
-    LOGNAME: "{{ atuin_user }}"
-    ATUIN_INSTALL_DIR: "{{ atuin_home }}/.atuin/bin"
+    HOME: "{{ target_home }}"
+    USER: "{{ target_user }}"
+    LOGNAME: "{{ target_user }}"
+    ATUIN_INSTALL_DIR: "{{ target_home }}/.atuin/bin"
   become: false
-  vars:
-    atuin_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
-    atuin_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ atuin_user, true) }}"
+  tags:
+    - base_packages
+    - atuin
 
 - name: Fail if no sudo user for .bashrc install
   ansible.builtin.fail:
     msg: "Refusing to manage .bashrc without SUDO_USER; run via sudo as the target user."
   when:
+    - target_user == 'root'
     - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
-    - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
   become: false
+  tags:
+    - base_packages
+    - bashrc
 
 - name: Manage user .bashrc
   ansible.builtin.copy:
     src: bashrc
-    dest: "{{ bashrc_home }}/.bashrc"
-    owner: "{{ bashrc_user }}"
-    group: "{{ bashrc_user }}"
+    dest: "{{ target_home }}/.bashrc"
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
     mode: "0644"
   become: false
-  vars:
-    bashrc_user: "{{ lookup('ansible.builtin.env', 'SUDO_USER') | default(lookup('ansible.builtin.env', 'USER'), true) }}"
-    bashrc_home: "{{ lookup('ansible.builtin.env', 'HOME') | default('/home/' ~ bashrc_user, true) }}"
+  tags:
+    - base_packages
+    - bashrc
 
-- name: Set system timezone to America/New_York
+- name: Get current timezone
   ansible.builtin.command:
-    cmd: timedatectl set-timezone America/New_York
+    cmd: timedatectl show -p Timezone --value
+  register: current_timezone
   changed_when: false
+  tags:
+    - base_packages
+    - timezone
+
+- name: Set system timezone
+  ansible.builtin.command:
+    cmd: timedatectl set-timezone {{ base_packages_timezone }}
+  when: current_timezone.stdout != base_packages_timezone
+  changed_when: true
+  tags:
+    - base_packages
+    - timezone

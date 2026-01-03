@@ -6,21 +6,32 @@
     - (lookup('ansible.builtin.env', 'SUDO_USER') | default('', true)) == ''
     - (lookup('ansible.builtin.env', 'USER') | default('root', true)) == 'root'
   become: false
+  tags:
+    - freshrss
 
 - name: Set FreshRSS user fact
   ansible.builtin.set_fact:
     freshrss_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+  tags:
+    - freshrss
+    - facts
 
 - name: Read FreshRSS user entry
   ansible.builtin.command:
     cmd: "getent passwd {{ freshrss_user }}"
   changed_when: false
   register: freshrss_getent
+  tags:
+    - freshrss
+    - facts
 
 - name: Set FreshRSS uid/gid facts
   ansible.builtin.set_fact:
     freshrss_uid: "{{ freshrss_getent.stdout.split(':')[2] }}"
     freshrss_gid: "{{ freshrss_getent.stdout.split(':')[3] }}"
+  tags:
+    - freshrss
+    - facts
 
 - name: Ensure quadlet directory exists
   ansible.builtin.file:
@@ -29,6 +40,9 @@
     owner: root
     group: root
     mode: "0755"
+  tags:
+    - freshrss
+    - quadlet
 
 - name: Install FreshRSS quadlet
   ansible.builtin.template:
@@ -38,15 +52,21 @@
     group: root
     mode: "0644"
   notify:
-    - Reload systemd
-    - Restart FreshRSS
+    - reload systemd
+    - restart freshrss
+  tags:
+    - freshrss
+    - quadlet
 
 - name: Flush systemd reload handler
   ansible.builtin.meta: flush_handlers
+  tags:
+    - freshrss
 
 - name: Enable and start FreshRSS
   ansible.builtin.systemd:
     name: freshrss.service
     enabled: true
     state: started
-    daemon_reload: true
+  tags:
+    - freshrss

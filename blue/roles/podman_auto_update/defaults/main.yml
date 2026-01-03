@@ -1,0 +1,3 @@
+---
+# Podman auto-update timer name
+podman_auto_update_timer: podman-auto-update.timer
