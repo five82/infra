@@ -13,3 +13,6 @@ PublishPort={{ freshrss_port }}:80/tcp
 
 [Service]
 Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

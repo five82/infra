@@ -78,7 +78,7 @@ def deploy(config, target_user, target_home):
             name="Reload systemd daemon",
         )
 
-    # Start Jellyfin (quadlet units are auto-enabled via generator, cannot be manually enabled)
+    # Start Jellyfin (boot enablement handled by [Install] section in quadlet file)
     systemd.service(
         name="Start Jellyfin",
         service="jellyfin.service",

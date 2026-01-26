@@ -79,7 +79,7 @@ def deploy(config):
             name="Reload systemd daemon",
         )
 
-    # Start Caddy (quadlet units are auto-enabled via generator, cannot be manually enabled)
+    # Start Caddy (boot enablement handled by [Install] section in quadlet file)
     systemd.service(
         name="Start Caddy",
         service="caddy.service",

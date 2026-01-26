@@ -34,7 +34,7 @@
 - Use `pyinfra @local deploy.py --sudo --dry` for dry runs.
 - Call out any expected service restarts or downtime.
 - When adding or updating quadlets, ensure systemd daemon reload happens before starting the service.
-- Quadlet services cannot be "enabled" (they're generator-managed); only start them.
+- Quadlet services cannot be enabled via `systemctl enable`; use an `[Install]` section in the quadlet file instead.
 
 ## Operational constraints
 - Assume headless operation.

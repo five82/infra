@@ -55,7 +55,7 @@ def deploy(config, target_user, target_home):
             name="Reload systemd daemon",
         )
 
-    # Start FreshRSS (quadlet units are auto-enabled via generator, cannot be manually enabled)
+    # Start FreshRSS (boot enablement handled by [Install] section in quadlet file)
     systemd.service(
         name="Start FreshRSS",
         service="freshrss.service",

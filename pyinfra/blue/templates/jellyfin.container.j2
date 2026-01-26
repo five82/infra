@@ -19,3 +19,6 @@ Volume={{ jellyfin_media_path }}:/media
 
 [Service]
 Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target
