@@ -3,6 +3,7 @@
 from . import (
     tailscale,
     base_packages,
+    nvidia,
     golang,
     nodejs,
     makemkv,
@@ -12,6 +13,7 @@ from . import (
 __all__ = [
     "tailscale",
     "base_packages",
+    "nvidia",
     "golang",
     "nodejs",
     "makemkv",

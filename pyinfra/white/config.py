@@ -24,6 +24,17 @@ class Config:
         "unattended-upgrades",
     ])
 
+    # NVIDIA
+    nvidia_cuda_repo_distro: str = "debian13"
+    nvidia_cuda_keyring_url: str = "https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb"
+    nvidia_driver_packages: List[str] = field(default_factory=lambda: [
+        "nvidia-driver-cuda",
+        "nvidia-kernel-open-dkms",
+    ])
+    nvidia_cuda_packages: List[str] = field(default_factory=lambda: [
+        "cuda-toolkit",
+    ])
+
     # Go
     go_version: str = "1.25.7"
 
