@@ -27,7 +27,7 @@ class Config:
     ])
 
     # Node.js
-    nvm_version: str = "v0.40.3"
+    nvm_version: str = "v0.40.2"
     nodejs_version: str = "25"
 
     # Podman auto-update
