@@ -23,6 +23,23 @@ class Config:
         "tree",
         "unattended-upgrades",
         "mediainfo",
+        "mkvtoolnix",
+        "build-essential",
+        "cmake",
+        "nasm",
+        "yasm",
+        "pkg-config",
+        "wget",
+        "autoconf",
+        "automake",
+        "libtool",
+        "clang",
+        "libva-dev",
+        "libva-drm2",
+        "libva-x11-2",
+        "libva2",
+        "meson",
+        "ninja-build",
     ])
 
     # NVIDIA
