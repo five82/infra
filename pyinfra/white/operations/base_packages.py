@@ -140,6 +140,17 @@ def deploy(config, target_user, target_home):
             _sudo=False,
         )
 
+    # Manage user .gitconfig
+    files.put(
+        name="Manage user .gitconfig",
+        src=str(files_dir / "gitconfig"),
+        dest=f"{target_home}/.gitconfig",
+        user=target_user,
+        group=target_user,
+        mode="0644",
+        _sudo=False,
+    )
+
     # Set user shell to zsh
     current_shell = host.get_fact(Command, f"getent passwd {target_user} | cut -d: -f7")
     if current_shell != "/usr/bin/zsh":
