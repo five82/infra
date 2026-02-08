@@ -40,6 +40,8 @@ class Config:
         "libva2",
         "meson",
         "ninja-build",
+        "zsh-autosuggestions",
+        "zsh-syntax-highlighting",
     ])
 
     # NVIDIA
