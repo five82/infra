@@ -22,6 +22,7 @@ class Config:
         "btop",
         "tree",
         "unattended-upgrades",
+        "mediainfo",
     ])
 
     # NVIDIA
