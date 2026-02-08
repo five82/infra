@@ -42,6 +42,9 @@ class Config:
         "ninja-build",
         "zsh-autosuggestions",
         "zsh-syntax-highlighting",
+        "bat",
+        "lsd",
+        "fd-find",
     ])
 
     # NVIDIA
