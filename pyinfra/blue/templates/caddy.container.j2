@@ -1,0 +1,18 @@
+[Unit]
+Description=Caddy
+
+[Container]
+Image={{ caddy_image }}
+ContainerName=caddy
+Label=io.containers.autoupdate=registry
+EnvironmentFile=/etc/caddy/caddy.env
+Network=host
+Volume=/etc/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+Volume=caddy-data:/data
+Volume=caddy-config:/config
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,24 @@
+[Unit]
+Description=Jellyfin
+
+[Container]
+Image={{ jellyfin_image }}
+ContainerName=jellyfin
+User={{ jellyfin_uid }}:{{ jellyfin_gid }}
+GroupAdd=keep-groups
+Label=io.containers.autoupdate=registry
+PublishPort={{ jellyfin_http_port }}:8096/tcp
+PublishPort={{ jellyfin_autodiscovery_port }}:7359/udp
+PublishPort={{ jellyfin_dlna_port }}:1900/udp
+{% for device in jellyfin_devices %}
+AddDevice={{ device }}
+{% endfor %}
+Volume={{ jellyfin_config_dir }}:/config
+Volume={{ jellyfin_cache_dir }}:/cache
+Volume={{ jellyfin_media_path }}:/media
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target default.target

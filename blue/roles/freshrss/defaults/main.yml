@@ -1,9 +1,0 @@
----
-# FreshRSS container image
-freshrss_image: lscr.io/linuxserver/freshrss:latest
-
-# Network port
-freshrss_port: 20009
-
-# Timezone for container
-freshrss_timezone: Etc/UTC
