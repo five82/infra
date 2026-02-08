@@ -3,6 +3,7 @@
 from . import (
     tailscale,
     base_packages,
+    nas_mount,
     nvidia,
     golang,
     nodejs,
@@ -13,6 +14,7 @@ from . import (
 __all__ = [
     "tailscale",
     "base_packages",
+    "nas_mount",
     "nvidia",
     "golang",
     "nodejs",

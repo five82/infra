@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import Config
-from operations import tailscale, base_packages, nvidia, golang, nodejs, makemkv, claude_code
+from operations import tailscale, base_packages, nas_mount, nvidia, golang, nodejs, makemkv, claude_code
 
 # Initialize configuration
 config = Config()
@@ -26,6 +26,7 @@ target_home = f"/home/{target_user}" if target_user else os.environ.get("HOME")
 # Deploy operations in order
 tailscale.deploy(config)
 base_packages.deploy(config, target_user, target_home)
+nas_mount.deploy(config)
 nvidia.deploy(config)
 golang.deploy(config)
 nodejs.deploy(config, target_user, target_home)

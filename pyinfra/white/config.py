@@ -45,6 +45,8 @@ class Config:
         "bat",
         "lsd",
         "fd-find",
+        "libbluray-bin",
+        "nfs-common",
     ])
 
     # NVIDIA
@@ -72,6 +74,12 @@ class Config:
         "libavcodec-dev",
         "zlib1g-dev",
     ])
+
+    # NAS mount
+    nas_mount_server: str = "10.100.90.3"
+    nas_mount_path: str = "/"
+    nas_mount_point: str = "/media/daspool"
+    nas_mount_opts: str = "noauto,x-systemd.automount,_netdev,nofail,hard,timeo=600,retrans=2"
 
     # Node.js
     nvm_version: str = "v0.40.2"
