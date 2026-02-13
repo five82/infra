@@ -61,7 +61,7 @@ class Config:
     ])
 
     # Go
-    go_version: str = "1.25.7"
+    go_version: str = "1.26.0"
 
     # MakeMKV
     makemkv_version: str = "1.18.3"
