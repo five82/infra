@@ -47,6 +47,7 @@ class Config:
         "fd-find",
         "libbluray-bin",
         "nfs-common",
+        "sqlite3",
     ])
 
     # NVIDIA
