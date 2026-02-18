@@ -48,6 +48,7 @@ class Config:
         "libbluray-bin",
         "nfs-common",
         "sqlite3",
+        "python3-dev",
     ])
 
     # NVIDIA
