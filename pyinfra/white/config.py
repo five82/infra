@@ -49,6 +49,7 @@ class Config:
         "nfs-common",
         "sqlite3",
         "python3-dev",
+        "jq",
     ])
 
     # NVIDIA
