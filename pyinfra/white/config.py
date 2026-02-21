@@ -50,6 +50,7 @@ class Config:
         "sqlite3",
         "python3-dev",
         "jq",
+        "bc",
     ])
 
     # NVIDIA
